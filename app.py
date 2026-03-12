@@ -1,7 +1,12 @@
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+# Add FFmpeg path so Whisper can find it
+os.environ["PATH"] += os.pathsep + r"C:\ffmpeg-8.0.1-essentials_build\bin"
+
 from flask import Flask, render_template, request
 import whisper
 from transformers import pipeline
-import os
 
 app = Flask(__name__)
 
@@ -31,15 +36,12 @@ def analyze():
     label = sentiment_result[0]["label"]
     score = sentiment_result[0]["score"]
 
-    return f"""
-    <h2>Transcription</h2>
-    <p>{text}</p>
-
-    <h2>Sentiment</h2>
-    <p>{label} (confidence {score:.2f})</p>
-
-    <br><a href="/">Try Another Audio</a>
-    """
+    return render_template(
+        "index.html",
+        transcription=text,
+        sentiment=label,
+        confidence=score
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)
